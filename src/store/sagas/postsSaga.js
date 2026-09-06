@@ -1,4 +1,4 @@
-import { all, call, put, select, takeLatest, delay } from "redux-saga/effects";
+import { call, put, select, takeLatest, delay } from "redux-saga/effects";
 import {
   fetchPosts,
   fetchPostsSuccess,
@@ -6,8 +6,8 @@ import {
   searchPosts,
   searchPostsSuccess,
   searchPostsFailure,
-} from "./appSlice";
-import { getPosts, searchPosts as searchPostsApi } from "./network";
+} from "../slices/postsSlice";
+import { getPosts, searchPosts as searchPostsApi } from "../network";
 
 const selectPagination = (state) => state.posts.posts;
 
@@ -25,10 +25,10 @@ function* fetchPostsWorker() {
 function* searchPostsWorker(action) {
   const query = action.payload;
 
-  yield delay(400); // debounce — wait for typing to pause
+  yield delay(400);
 
   if (!query.trim()) {
-    return; // empty query — nothing to search, let clearSearch handle reverting to the feed
+    return;
   }
 
   try {
@@ -39,14 +39,7 @@ function* searchPostsWorker(action) {
   }
 }
 
-function* fetchPostsWatcher() {
+export default function* postsSaga() {
   yield takeLatest(fetchPosts.type, fetchPostsWorker);
-}
-
-function* searchPostsWatcher() {
   yield takeLatest(searchPosts.type, searchPostsWorker);
-}
-
-export default function* rootSaga() {
-  yield all([fetchPostsWatcher(), searchPostsWatcher()]);
 }
